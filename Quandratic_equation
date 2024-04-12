@@ -1,0 +1,61 @@
+# option_pricing.py
+import sys  # Import the sys module needed for handling command-line arguments
+import cmath  # Import the cmath module for handling complex numbers
+import math  # Import the math module for mathematical operations
+
+def solve_quadratic(a, b, c): 
+    """Solves the quadratic equation ax^2 + bx + c = 0."""
+    if a == 0:  # Check if the equation is linear
+        if b != 0:  # Check if the equation is a linear equation
+            if c != 0:  # Check if the equation is a linear equation
+                return ("linear", -c/b)  # Returns the solution for a linear equation
+            return ("linear", 0)  # Returns the solution for a linear equation when c = 0
+        if c == 0:  # Check if the equation has infinitely many solutions
+            return "infinitely_many_solutions"  # Returns information about infinitely many solutions
+        return "no_solution"  # Returns information about no solutions for a linear equation
+    
+    delta = b**2 - 4*a*c  # Calculate the discriminant
+
+    if delta > 0:  # Check if the discriminant is greater than zero
+        x1 = (-b + math.sqrt(delta))/(2*a)  # First real solution
+        x2 = (-b - math.sqrt(delta))/(2*a)  # Second real solution
+        return ("two_solutions", x1, x2)  # Returns two real roots
+    
+    if delta < 0:  # Check if the discriminant is less than zero (complex solutions)
+        x1 = (-b + cmath.sqrt(delta))/(2*a)  # First complex solution
+        x2 = (-b - cmath.sqrt(delta))/(2*a)  # Second complex solution
+        return ("two_complex_solutions", x1, x2)  # Returns two complex roots
+
+    else:  # For delta equal to zero (one solution)
+        x0 = -b/(2*a)  # Calculate one solution
+        return ("one_solution", x0)  # Returns one solution
+
+def main(): 
+    """Main function of the program."""
+    if len(sys.argv) != 4:  # Check if the number of command-line arguments is equal to 4
+        print("Incorrect input")  # Print an error message
+        return  # End the function
+
+    try:  # Attempt to convert arguments to floating-point numbers
+        a, b, c = map(float, sys.argv[1:])  # Convert arguments to floats
+    except ValueError:  # In case of conversion failure
+        print("Incorrect input")  # Print an error message
+        return  # End the function
+
+    result = solve_quadratic(a, b, c)  # Solve the quadratic equation
+
+    if result == "no_solution":  # No solutions
+        print("No solutions")  # Print a message
+    elif result == "infinitely_many_solutions":  # Infinitely many solutions
+        print("Infinitely many solutions")  # Print a message
+    elif result[0] == "linear":  # One linear solution
+        print(f"Linear function: x0 = {result[1]}")  # Print a message
+    elif result[0] == "one_solution":  # One real quadratic solution
+        print(f"Quadratic function: x0 = {result[1]}")  # Print a message
+    elif result[0] == "two_solutions":  # Two real quadratic solutions
+        print(f"Real solutions: x1 = {result[1]}, x2 = {result[2]}")  # Print a message
+    elif result[0] == "two_complex_solutions":  # Two complex quadratic solutions
+        print(f"Complex solutions: z1 = {result[1]}, z2 = {result[2]}")  # Print a message
+
+if __name__ == "__main__": 
+    main()  # Call the main function
