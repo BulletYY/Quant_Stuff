@@ -154,3 +154,11 @@ class Hist2D:
         self.figure.patch.set_facecolor('white')
         self.ax.set_facecolor('white')
         self.canvas.draw()
+
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Hist2D(root)
+    root.mainloop()
+        
