@@ -4,6 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import yfinance as yf
 import matplotlib.pyplot as plt
 
+
 class Hist2D:
     def __init__(self, root):
         self.root = root
@@ -23,82 +24,127 @@ class Hist2D:
         style.configure("TFrame", background="white")
         style.configure("TButton", background="white", foreground="black")
         style.configure("TEntry", fieldbackground="white", foreground="black")
-        style.configure("TCombobox", fieldbackground="white", background="white", foreground="black")
+        style.configure("TCombobox", fieldbackground="white",
+                        background="white", foreground="black")
         style.map("TButton",
-            foreground=[('active', 'black')],
-            background=[('active', 'lightgrey')]
-        )
+                  foreground=[('active', 'black')],
+                  background=[('active', 'lightgrey')]
+                  )
 
         self.root.configure(bg="white")
 
     def create_widgets(self):
         self.control_frame = ttk.Frame(self.root)
-        self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self.control_frame.grid(
+            row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-        ttk.Label(self.control_frame, text="Stock Ticker:").grid(row=0, column=0, padx=10, pady=5)
+        ttk.Label(self.control_frame, text="Stock Ticker:").grid(
+            row=0, column=0, padx=10, pady=5)
         self.ticker_entry = ttk.Entry(self.control_frame)
         self.ticker_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        self.fetch_button = ttk.Button(self.control_frame, text="Fetch Data", command=self.fetch_data)
-        self.fetch_button.grid(row=0, column=2, padx=10, pady=5)
+        ttk.Label(self.control_frame, text="Period:").grid(
+            row=1, column=0, padx=10, pady=5)
+        self.period_var = tk.StringVar()
+        self.period_dropdown = ttk.Combobox(
+            self.control_frame, textvariable=self.period_var, state="readonly")
+        self.period_dropdown['values'] = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd']
+        self.period_dropdown.grid(row=1, column=1, padx=10, pady=5)
+        self.period_dropdown.set('1y')  # Default value
 
-        ttk.Label(self.control_frame, text="X:").grid(row=1, column=0, padx=10, pady=5)
+        self.fetch_button = ttk.Button(
+            self.control_frame, text="Fetch Data", command=self.fetch_data)
+        self.fetch_button.grid(row=1, column=2, padx=10, pady=5)
+
+        ttk.Label(self.control_frame, text="X:").grid(
+            row=2, column=0, padx=10, pady=5)
         self.x_var = tk.StringVar()
-        self.x_dropdown = ttk.Combobox(self.control_frame, textvariable=self.x_var, state="readonly")
-        self.x_dropdown.grid(row=1, column=1, padx=10, pady=5)
+        self.x_dropdown = ttk.Combobox(
+            self.control_frame, textvariable=self.x_var, state="readonly")
+        self.x_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
-        ttk.Label(self.control_frame, text="Y:").grid(row=2, column=0, padx=10, pady=5)
+        ttk.Label(self.control_frame, text="Y:").grid(
+            row=3, column=0, padx=10, pady=5)
         self.y_var = tk.StringVar()
-        self.y_dropdown = ttk.Combobox(self.control_frame, textvariable=self.y_var, state="readonly")
-        self.y_dropdown.grid(row=2, column=1, padx=10, pady=5)
+        self.y_dropdown = ttk.Combobox(
+            self.control_frame, textvariable=self.y_var, state="readonly")
+        self.y_dropdown.grid(row=3, column=1, padx=10, pady=5)
 
-        self.plot_button = ttk.Button(self.control_frame, text="Plot Data", command=self.plot_data)
-        self.plot_button.grid(row=3, column=0, columnspan=3, pady=10)
+        ttk.Label(self.control_frame, text="Bins:").grid(
+            row=4, column=0, padx=10, pady=5)
+        self.bins_entry = ttk.Entry(self.control_frame)
+        self.bins_entry.grid(row=4, column=1, padx=10, pady=5)
+        self.bins_entry.insert(0, "150")
+
+        ttk.Label(self.control_frame, text="Cmap:").grid(
+            row=5, column=0, padx=10, pady=5)
+        self.cmap_var = tk.StringVar()
+        self.cmap_dropdown = ttk.Combobox(
+            self.control_frame, textvariable=self.cmap_var, state="readonly")
+        self.cmap_dropdown['values'] = [
+            'Blues', 'viridis', 'plasma', 'inferno', 'magma']
+        self.cmap_dropdown.grid(row=5, column=1, padx=10, pady=5)
+        self.cmap_dropdown.set('Blues')
+
+        self.plot_button = ttk.Button(
+            self.control_frame, text="Plot Data", command=self.plot_data)
+        self.plot_button.grid(row=6, column=0, columnspan=3, pady=10)
 
         self.canvas_frame = ttk.Frame(self.root)
-        self.canvas_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        self.canvas_frame.grid(row=0, column=1, padx=10,
+                               pady=10, sticky="nsew")
         self.figure, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.canvas_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
     def fetch_data(self):
         ticker = self.ticker_entry.get().strip()
+        period = self.period_dropdown.get()
         if not ticker:
-            messagebox.showwarning("Input Error", "Please enter a stock ticker.")
+            messagebox.showwarning(
+                "Input Error", "Please enter a stock ticker")
             return
 
         try:
-            self.data = yf.download(ticker, period="1y")
+            self.data = yf.download(ticker, period=period)
             if self.data.empty:
-                raise ValueError("No data fetched.")
+                raise ValueError("No data fetched")
 
             columns = self.data.columns.tolist()
             self.x_dropdown['values'] = columns
             self.y_dropdown['values'] = columns
             messagebox.showinfo("Success", "Data fetched successfully!")
+        except ValueError as e:
+            messagebox.showerror("Data Error", f"Failed to fetch data: {e}")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to fetch data: {e}")
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
-    def plot_data(self):
+    def plot_data(self, **kwargs):
         if self.data is None:
-            messagebox.showwarning("Data Error", "No data to plot. Please fetch data first.")
+            messagebox.showwarning(
+                "Data Error", "No data to plot. Please fetch data first")
             return
 
         x_col = self.x_var.get()
         y_col = self.y_var.get()
 
         if not x_col or not y_col:
-            messagebox.showwarning("Selection Error", "Please select both X and Y axes.")
+            messagebox.showwarning(
+                "Selection Error", "Please select both X and Y axes")
             return
 
         x = self.data[x_col]
         y = self.data[y_col]
 
-        self.ax.clear()  # Clear the previous plot
-        self.figure.clear()  # Clear the entire figure including colorbar
+        self.ax.clear()
+        self.figure.clear()
 
-        self.ax = self.figure.add_subplot(111)  # Recreate the subplot
-        h = self.ax.hist2d(x, y, bins=30, cmap='Blues')
+        self.ax = self.figure.add_subplot(111)
+
+        bins = int(self.bins_entry.get())
+        cmap = self.cmap_var.get()
+
+        h = self.ax.hist2d(x, y, bins=bins, cmap=cmap, **kwargs)
         self.figure.colorbar(h[3], ax=self.ax, label='Counts')
         self.ax.set_xlabel(x_col, color="black")
         self.ax.set_ylabel(y_col, color="black")
@@ -108,8 +154,3 @@ class Hist2D:
         self.figure.patch.set_facecolor('white')
         self.ax.set_facecolor('white')
         self.canvas.draw()
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = Hist2D(root)
-    root.mainloop()
