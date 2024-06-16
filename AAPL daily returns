@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 
 def fetch_stock_data(symbol, start_date, end_date):
-    """Fetch historical stock price data from Alpha Vantage."""
     api_key = 'YOUR_ALPHA_VANTAGE_API_KEY'  # Replace with your Alpha Vantage API key
     ts = TimeSeries(key=api_key, output_format='pandas')
     data, meta_data = ts.get_daily(symbol, outputsize='full')
@@ -14,24 +13,19 @@ def fetch_stock_data(symbol, start_date, end_date):
 
 
 def main():
-    # Define the stock symbol and date range
     symbol = 'AAPL'
     start_date = '2023-01-01'
     end_date = '2024-01-01'
 
-    # Fetch historical stock price data
     stock_data = fetch_stock_data(symbol, start_date, end_date)
 
-    # Calculate daily returns
     stock_data['Daily_Return'] = stock_data['4. close'].pct_change().dropna()
 
-    # Plot the daily returns
     stock_data['Daily_Return'].plot(figsize=(10, 6))
     plt.title('Daily Returns of AAPL')
     plt.xlabel('Date')
     plt.ylabel('Daily Return')
     plt.show()
-
 
 if __name__ == "__main__":
     main()
