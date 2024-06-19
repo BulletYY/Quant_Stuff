@@ -1,0 +1,71 @@
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import ttest_ind
+
+stock_symbols = ["AAPL", "MSFT"]
+pre_crisis_start = "2019-11-13"
+pre_crisis_end = "2020-03-10"
+post_crisis_start = "2020-03-12"
+post_crisis_end = "2020-06-08"
+crisis_date = "2020-03-11"
+
+data = {}
+pre_crisis_data = {}
+post_crisis_data = {}
+stats = {}
+t_tests = {}
+
+for stock in stock_symbols:
+    data[stock] = yf.download(stock, start="2018-11-13", end="2020-06-08")
+
+for stock in stock_symbols:
+    data[stock]['Simple Return'] = data[stock]['Adj Close'].pct_change()
+    data[stock]['Log Return'] = np.log(data[stock]['Adj Close'] / data[stock]['Adj Close'].shift(1))
+
+for stock in stock_symbols:
+    pre_crisis_data[stock] = data[stock].loc[pre_crisis_start:pre_crisis_end]
+    post_crisis_data[stock] = data[stock].loc[post_crisis_start:post_crisis_end]
+
+for stock in stock_symbols:
+    stats[stock] = {
+        "Pre-crisis": pre_crisis_data[stock].describe(),
+        "Post-crisis": post_crisis_data[stock].describe()
+    }
+
+for stock in stock_symbols:
+    t_tests[stock] = {
+        "Simple Return": ttest_ind(pre_crisis_data[stock]['Simple Return'].dropna(), post_crisis_data[stock]['Simple Return'].dropna()),
+        "Log Return": ttest_ind(pre_crisis_data[stock]['Log Return'].dropna(), post_crisis_data[stock]['Log Return'].dropna()),
+        "Volume": ttest_ind(pre_crisis_data[stock]['Volume'].dropna(), post_crisis_data[stock]['Volume'].dropna())
+    }
+
+for stock in stock_symbols:
+    plt.figure(figsize=(14, 7))
+
+    plt.subplot(2, 1, 1)
+    plt.plot(data[stock].index, data[stock]['Simple Return'], label='Simple Return')
+    plt.axvline(x=pd.to_datetime(crisis_date), color='r', linestyle='--', label='Crisis Date')
+    plt.title(f"{stock} Daily Simple Returns")
+    plt.legend()
+
+    plt.subplot(2, 1, 2)
+    plt.plot(data[stock].index, data[stock]['Volume'], label='Volume')
+    plt.axvline(x=pd.to_datetime(crisis_date), color='r', linestyle='--', label='Crisis Date')
+    plt.title(f"{stock} Trading Volume")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+for stock in stock_symbols:
+    print(f"Descriptive statistics for {stock}:")
+    print("Pre-crisis period:")
+    print(stats[stock]["Pre-crisis"])
+    print("Post-crisis period:")
+    print(stats[stock]["Post-crisis"])
+
+    print(f"\nT-test results for {stock}:")
+    for metric, test_result in t_tests[stock].items():
+        print(f"{metric}: t-statistic = {test_result.statistic}, p-value = {test_result.pvalue}")
