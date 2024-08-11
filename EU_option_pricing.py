@@ -1,17 +1,6 @@
 import QuantLib
 print(dir(QuantLib))
 
-
-list1 = [1, 2, 3]
-list2 = ['a', 'b', 'c']
-
-zipped = zip(list1, list2)
-
-my_list = [1, 2, 3]
-print(*my_list)  # Equivalent to print(1, 2, 3)
-my_string = "hello"
-print(*my_string)  # Equivalent to print('h', 'e', 'l', 'l', 'o')
-
 import QuantLib as ql
 
 option_type = ql.Option.Call
