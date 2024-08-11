@@ -69,3 +69,25 @@ for stock in stock_symbols:
     print(f"\nT-test results for {stock}:")
     for metric, test_result in t_tests[stock].items():
         print(f"{metric}: t-statistic = {test_result.statistic}, p-value = {test_result.pvalue}")
+
+for stock in stock_symbols:
+    print(f"Descriptive statistics for {stock}:")
+    print("Pre-crisis period:")
+    print(stats[stock]["Pre-crisis"])
+    print("Post-crisis period:")
+    print(stats[stock]["Post-crisis"])
+
+    print(f"\nT-test results for {stock}:")
+    for metric, test_result in t_tests[stock].items():
+        t_stat = test_result.statistic
+        p_value = test_result.pvalue
+        print(f"{metric}: t-statistic = {t_stat}, p-value = {p_value}")
+        
+        if p_value < 0.05:
+            print(f"  The difference in {metric} between pre-crisis and post-crisis periods is statistically significant.")
+            if t_stat > 0:
+                print(f"  The average {metric} increased after the crisis.")
+            else:
+                print(f"  The average {metric} decreased after the crisis.")
+        else:
+            print(f"  The difference in {metric} between pre-crisis and post-crisis periods is not statistically significant.")
